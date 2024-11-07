@@ -1,13 +1,7 @@
 main {
-  max-width: 1238px;
+  max-width: var(--width-content);
   background-color: var(--color-white);
   padding: 1rem;
   margin: 0 auto;
   box-sizing: border-box; // Prevent any added padding from expanding the main element's width beyond the viewport.
-}
-
-.content {
-  background: #333;
-  height: 300px;
-  margin: 1em;
 }
