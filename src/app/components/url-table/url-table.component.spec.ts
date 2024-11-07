@@ -8,9 +8,8 @@ describe('UrlTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UrlTableComponent]
-    })
-    .compileComponents();
+      imports: [UrlTableComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(UrlTableComponent);
     component = fixture.componentInstance;
