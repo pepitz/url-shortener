@@ -1,0 +1,14 @@
+@import '../../../assets/styles/index.scss';
+
+.header-container {
+  background-color: var(--color-primary);
+  height: var(--header-height);
+  position: sticky;
+  top: 0;
+  width: 100%;
+
+  .header-logo {
+    width: 15rem;
+    height: auto;
+  }
+}
