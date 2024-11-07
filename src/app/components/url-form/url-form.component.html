@@ -1,1 +1,15 @@
-<p>url-form works!</p>
+<section class="url-form">
+  <form (ngSubmit)="onSubmit(longUrlInput.value)" #form>
+    <app-control label="Enter the URL that want to be shorten">
+      <input name="inputURL" id="inputURL" #longUrlInput #input />
+    </app-control>
+
+    <app-control label="Customize the shorten url">
+      <input name="outputURL" id="outputURL" #shortUrlOutput #input placeholder="Your Short URL" />
+    </app-control>
+
+    <p class="button-container">
+      <button type="submit">Create Short URL</button>
+    </p>
+  </form>
+</section>

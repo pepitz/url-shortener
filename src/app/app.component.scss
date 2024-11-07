@@ -1,7 +1,17 @@
 main {
   max-width: var(--width-content);
   background-color: var(--color-white);
-  padding: 1rem;
   margin: 0 auto;
-  box-sizing: border-box; // Prevent any added padding from expanding the main element's width beyond the viewport.
+  overflow: hidden;
+  box-sizing: border-box;
+  // @media only screen and (max-width: 1238px) {
+  //   padding: 0 15%;
+  // }
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    & > *:not(app-url-form) {
+      padding: 0 15%;
+    }
+  }
 }

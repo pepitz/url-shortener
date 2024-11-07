@@ -1,0 +1,30 @@
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  & > * {
+    flex: 1;
+  }
+
+  & label {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: normal;
+    color: var(--color-white);
+  }
+
+  & input {
+    padding: 1rem;
+    border: none;
+    font: inherit;
+    font-size: 1.4rem;
+    color: #4f4b53;
+
+    &:focus {
+      outline: transparent;
+      border: none; /* Removes any border if applied */
+      box-shadow: none; /* Removes any inset shadow */
+    }
+  }
+}
