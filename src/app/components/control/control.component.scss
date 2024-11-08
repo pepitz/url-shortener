@@ -7,6 +7,10 @@
     flex: 1;
   }
 
+  &:has(.ng-invalid.ng-touched.ng-dirty) label {
+    color: var(--color-invalid-label);
+  }
+
   & label {
     display: block;
     font-size: 1.4rem;
@@ -14,17 +18,15 @@
     color: var(--color-white);
   }
 
+  &:has(.ng-invalid.ng-touched.ng-dirty) input {
+    background-color: var(--color-invalid-background);
+    border-color: var(--color-invalid-input);
+  }
+
   & input {
     padding: 1rem;
-    border: none;
     font: inherit;
     font-size: 1.4rem;
-    color: #4f4b53;
-
-    &:focus {
-      outline: transparent;
-      border: none; /* Removes any border if applied */
-      box-shadow: none; /* Removes any inset shadow */
-    }
+    color: var(--color-text-placeholder);
   }
 }

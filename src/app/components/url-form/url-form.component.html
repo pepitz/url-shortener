@@ -1,15 +1,23 @@
 <section class="url-form">
-  <form (ngSubmit)="onSubmit(longUrlInput.value)" #form>
-    <app-control label="Enter the URL that want to be shorten">
-      <input name="inputURL" id="inputURL" #longUrlInput #input />
+  <form (ngSubmit)="onSubmit(form)" #form="ngForm">
+    <app-control for="longURL" label="Enter the URL that want to be shorten">
+      <input name="longURL" id="longURL" #longUrl="ngModel" #input required ngModel />
     </app-control>
 
-    <app-control label="Customize the shorten url">
-      <input name="outputURL" id="outputURL" #shortUrlOutput #input placeholder="Your Short URL" />
+    <app-control for="shortURL" label="Customize the shorten url">
+      <input name="shortURL" id="shortURL" #shortUrl="ngModel" required #input placeholder="Your Short URL" ngModel />
     </app-control>
 
     <p class="button-container">
       <button type="submit">Create Short URL</button>
     </p>
+
+    @if (longUrl.touched && longUrl.dirty && longUrl.invalid) {
+      <p class="control-error">Invalid Long URL entered.</p>
+    }
+
+    @if (shortUrl.touched && shortUrl.dirty && shortUrl.invalid) {
+      <p class="control-error">Invalid Short URL entered.</p>
+    }
   </form>
 </section>

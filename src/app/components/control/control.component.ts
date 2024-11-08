@@ -13,4 +13,5 @@ import { Component, input, ViewEncapsulation } from '@angular/core';
 })
 export class ControlComponent {
   label = input.required<string>();
+  for = input.required<string>();
 }
