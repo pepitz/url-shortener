@@ -41,7 +41,7 @@
 
     <p class="button-container">
       <button type="submit" [disabled]="form.touched && !form.valid">Create Short URL</button>
-      @if (isLoading()) {
+      @if (isLoadingCreate()) {
         <span class="flex align-items-center">
           <i class="pi pi-spin pi-sync ml-5" style="font-size: 2rem"></i>
         </span>

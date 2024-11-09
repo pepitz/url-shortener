@@ -1,40 +1,95 @@
 import { computed, inject } from '@angular/core';
 import { pipe, switchMap, tap } from 'rxjs';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { ShortUrl, ShortUrlCreationRequest } from '../models/short-url.model';
+import {
+  ShortUrl,
+  ShortUrlCreationRequest,
+  ShortUrlSearchRequest,
+  ShortUrlSearchResponse,
+} from '../models/short-url.model';
 import { UrlShortenService } from '../services/url-shorten.service';
 import { MessageService } from 'primeng/api';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-// Define the state type
 interface UrlState {
   hits: ShortUrl[];
-  isLoading: boolean;
+  totalHits: number;
+  isLoadingCreate: boolean;
+  isLoadingFind: boolean;
 }
 
-// Initial state
 const initialState: UrlState = {
   hits: [],
-  isLoading: false,
+  totalHits: 0,
+  isLoadingCreate: false,
+  isLoadingFind: false,
 };
 
-// Create the signal store
 export const UrlStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ hits }) => ({
+  withComputed(({ hits, totalHits }) => ({
     hitsCount: computed(() => hits().length),
+    totalHitsCount: computed(() => totalHits()),
   })),
+  withHooks({
+    onInit(store) {
+      const urlShortenService = inject(UrlShortenService);
+
+      const searchRequest: ShortUrlSearchRequest = {
+        pageNumber: 0,
+        pageSize: 10,
+        term: '',
+      };
+
+      patchState(store, { isLoadingFind: true });
+
+      urlShortenService
+        .findShortUrls(searchRequest)
+        .pipe(
+          takeUntilDestroyed(),
+          tapResponse({
+            next: (response: ShortUrlSearchResponse) => {
+              patchState(store, {
+                hits: response.hits,
+                totalHits: response.totalHits,
+              });
+
+              console.log('State after fetching short URLs:', {
+                hits: store.hits(),
+                totalHits: store.totalHits(),
+                isLoadingFind: store.isLoadingFind(),
+              });
+            },
+            error: (err: { status: number; message: string }) => {
+              console.error(`Error fetching short URLs: ${err.message}`);
+            },
+            finalize: () => {
+              patchState(store, { isLoadingFind: false });
+
+              console.log('State after finalizing the fetch request:', {
+                hits: store.hits(),
+                totalHits: store.totalHits(),
+                isLoadingFind: store.isLoadingFind(),
+              });
+            },
+          })
+        )
+        .subscribe();
+    },
+  }),
   withMethods((store, urlShortenService = inject(UrlShortenService), messageService = inject(MessageService)) => ({
     createShortUrl: rxMethod<ShortUrlCreationRequest>(
       pipe(
-        tap(() => patchState(store, { isLoading: true })),
+        tap(() => patchState(store, { isLoadingCreate: true })),
         switchMap(request =>
           urlShortenService.createShortUrl(request).pipe(
+            takeUntilDestroyed(),
             tapResponse({
               next: shortUrl => {
-                patchState(store, { hits: [...store.hits(), shortUrl] });
+                patchState(store, { hits: [...store.hits(), shortUrl], totalHits: store.totalHits() + 1 });
                 messageService.add({
                   severity: 'success',
                   summary: 'Success',
@@ -51,7 +106,7 @@ export const UrlStore = signalStore(
                   sticky: true,
                 });
               },
-              finalize: () => patchState(store, { isLoading: false }),
+              finalize: () => patchState(store, { isLoadingCreate: false }),
             })
           )
         )

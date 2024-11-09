@@ -22,7 +22,7 @@ export class UrlFormComponent {
 
   longUrl = signal('');
   shortUrl = signal(`${predefinedShortAPIPath}`);
-  isLoading = this.urlStore.isLoading;
+  isLoadingCreate = this.urlStore.isLoadingCreate; // Update to use isLoadingCreate
 
   onSubmit(formData: NgForm) {
     if (formData.form.invalid) {
@@ -37,6 +37,7 @@ export class UrlFormComponent {
       shortUrlValue = generateRandomShortUrl();
     }
 
+    // Prefix the predefined path
     const fullShortUrl = `${predefinedShortAPIPath}${shortUrlValue}`;
 
     const creationRequest: ShortUrlCreationRequest = {
