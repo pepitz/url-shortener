@@ -44,7 +44,9 @@ export const UrlStore = signalStore(
         term: '',
       };
 
-      patchState(store, { isLoadingFind: true });
+      patchState(store, {
+        isLoadingFind: true,
+      });
 
       urlShortenService
         .findShortUrls(searchRequest)
@@ -53,7 +55,7 @@ export const UrlStore = signalStore(
           tapResponse({
             next: (response: ShortUrlSearchResponse) => {
               patchState(store, {
-                hits: response.hits,
+                hits: [...response.hits],
                 totalHits: response.totalHits,
               });
 
@@ -67,7 +69,9 @@ export const UrlStore = signalStore(
               console.error(`Error fetching short URLs: ${err.message}`);
             },
             finalize: () => {
-              patchState(store, { isLoadingFind: false });
+              patchState(store, {
+                isLoadingFind: false,
+              });
 
               console.log('State after finalizing the fetch request:', {
                 hits: store.hits(),
@@ -83,13 +87,20 @@ export const UrlStore = signalStore(
   withMethods((store, urlShortenService = inject(UrlShortenService), messageService = inject(MessageService)) => ({
     createShortUrl: rxMethod<ShortUrlCreationRequest>(
       pipe(
-        tap(() => patchState(store, { isLoadingCreate: true })),
+        tap(() =>
+          patchState(store, {
+            isLoadingCreate: true,
+          })
+        ),
         switchMap(request =>
           urlShortenService.createShortUrl(request).pipe(
             takeUntilDestroyed(),
             tapResponse({
               next: shortUrl => {
-                patchState(store, { hits: [...store.hits(), shortUrl], totalHits: store.totalHits() + 1 });
+                patchState(store, {
+                  hits: [...store.hits(), shortUrl],
+                  totalHits: store.totalHits() + 1,
+                });
                 messageService.add({
                   severity: 'success',
                   summary: 'Success',
@@ -106,7 +117,10 @@ export const UrlStore = signalStore(
                   sticky: true,
                 });
               },
-              finalize: () => patchState(store, { isLoadingCreate: false }),
+              finalize: () =>
+                patchState(store, {
+                  isLoadingCreate: false,
+                }),
             })
           )
         )
