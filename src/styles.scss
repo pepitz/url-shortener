@@ -4,7 +4,8 @@
 html {
   margin: 0;
   padding: 0;
-  font-size: 10px;
+  /* 62.5% of 16px user agent font size is 10px */
+  font-size: 62.5%;
 }
 
 body {
@@ -13,4 +14,5 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-size: 1.6rem;
 }

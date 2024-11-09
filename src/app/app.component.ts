@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { UrlFormComponent } from './components/url-form/url-form.component';
-import { UrlTableComponent } from './components/url-table/url-table.component';
 import { SubheaderComponent } from './components/subheader/subheader.component';
+
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, UrlFormComponent, UrlTableComponent, SubheaderComponent],
+  imports: [HeaderComponent, UrlFormComponent, SubheaderComponent, ToastModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

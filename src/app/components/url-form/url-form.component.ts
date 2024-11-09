@@ -1,25 +1,26 @@
-import { ChangeDetectionStrategy, Component, inject, signal, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ControlComponent } from '../control/control.component';
-import { ShortUrlCreationRequest, type ShortUrl } from '../../models/short-url.model';
-import { UrlShortenService } from '../../services/url-shorten.service';
 import { CommonModule } from '@angular/common';
 import { predefinedShortAPIPath } from '../../../assets/api/api';
+import { ShortUrlCreationRequest } from '../../models/short-url.model';
+import { UrlStore } from '../../state/url.store';
 
 @Component({
   selector: 'app-url-form',
   standalone: true,
-  providers: [UrlShortenService],
+  providers: [UrlStore],
   imports: [ControlComponent, FormsModule, CommonModule],
   templateUrl: './url-form.component.html',
   styleUrls: ['./url-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UrlFormComponent {
-  private urlShortenService = inject(UrlShortenService);
-  private destroyRef = inject(DestroyRef);
+  private urlStore = inject(UrlStore);
+
   longUrl = signal('');
   shortUrl = signal(`${predefinedShortAPIPath}`);
+  isLoading = this.urlStore.isLoading;
 
   onSubmit(formData: NgForm) {
     if (formData.form.invalid) {
@@ -35,16 +36,7 @@ export class UrlFormComponent {
       creationDate: new Date().toISOString(),
     };
 
-    const subscription = this.urlShortenService.createShortUrl(creationRequest).subscribe(
-      (response: ShortUrl) => {
-        console.log('Short URL Created:', response);
-      },
-      (error: { status: number; message: string }) => {
-        console.error('Error creating short URL:', error);
-      }
-    );
-
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+    this.urlStore.createShortUrl(creationRequest);
 
     formData.form.reset();
   }

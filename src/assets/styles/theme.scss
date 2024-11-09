@@ -12,3 +12,8 @@
   --header-height: 8rem;
   --width-content: 1238px;
 }
+
+::ng-deep .p-toast {
+  width: 40rem;
+  font-size: 1.4rem;
+}
