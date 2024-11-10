@@ -28,7 +28,6 @@ const initialState: UrlState = {
   isLoadingFind: false,
 };
 
-// Utility function to calculate relative time string
 function getRelativeTime(date: Date): string {
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
@@ -52,7 +51,6 @@ export const UrlStore = signalStore(
   withComputed(({ hits, totalHits }) => ({
     hitsCount: computed(() => hits().length),
     totalHitsCount: computed(() => totalHits()),
-    // Computed signal for table data
     urlData: computed(() =>
       hits().map(hit => ({
         shortUrlDetails: {
@@ -61,7 +59,7 @@ export const UrlStore = signalStore(
         },
         creationDateToString: getRelativeTime(new Date(hit.creationDate)),
         shortUrl: hit.shortUrl,
-        qrCodeData: hit.shortUrl, // Use shortUrl as the data for generating QR code
+        qrCodeData: hit.shortUrl,
       }))
     ),
   })),
@@ -71,7 +69,7 @@ export const UrlStore = signalStore(
 
       const searchRequest: ShortUrlSearchRequest = {
         pageNumber: 0,
-        pageSize: 10,
+        pageSize: 100,
         term: '',
       };
 

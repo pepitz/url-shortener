@@ -1,18 +1,16 @@
 <p-table
+  #urlsDataTable
   [value]="store.urlData()"
   [paginator]="true"
-  [rows]="5"
-  [first]="first"
+  [globalFilterFields]="['url', 'creationDate']"
+  [rows]="rows()"
+  [rowsPerPageOptions]="rowsPerPageOptions"
   [showCurrentPageReport]="true"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} URLs"
   [tableStyle]="{ width: '100%' }"
-  [totalRecords]="totalRecords"
-  [rowsPerPageOptions]="[10, 25, 50, 100]"
   paginatorPosition="bottom"
   sortField="creationDateToString"
-  [sortOrder]="-1"
-  (onPage)="pageChange($event)"
-  pageLinks="5">
+  [sortOrder]="-1">
   <ng-template pTemplate="header">
     <tr>
       <th class="shorten_head">
@@ -46,7 +44,7 @@
         </a>
       </td>
       <td>
-        <qrcode [qrdata]="url.qrCodeData" [width]="60"></qrcode>
+        <qrcode [qrdata]="url.qrCodeData" [width]="60" [allowEmptyString]="true"></qrcode>
       </td>
     </tr>
   </ng-template>
