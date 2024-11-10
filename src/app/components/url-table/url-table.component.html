@@ -1,1 +1,69 @@
-<p>url-table works!</p>
+<section class="urls-table">
+  <!-- Rows per page dropdown -->
+  <!-- <div class="table-options">
+    <div class="left">
+      <label for="rowsPerPage">Rows per page:</label>
+      <p-dropdown
+        [options]="rowsPerPageOptions"
+        [ngModel]="rowsPerPage()"
+        (ngModelChange)="updateRowsPerPage($event)"
+        placeholder="Select rows per page">
+      </p-dropdown>
+    </div>
+  </div> -->
+
+  <!-- Table Section -->
+  <p-table
+    [value]="store.urlData()"
+    [paginator]="true"
+    [rows]="rowsPerPage()"
+    [totalRecords]="store.totalHitsCount()"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+    paginatorPosition="bottom"
+    sortField="creationDateToString"
+    [sortOrder]="-1"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} URLs"
+    [tableStyle]="{ width: '100%' }">
+    <!-- Table Headers -->
+    <ng-template pTemplate="header">
+      <tr>
+        <th class="shorten_head">
+          <span class="shorten_title">Shortened URL</span>
+          <span class="shorten_original">Original URL</span>
+        </th>
+        <th pSortableColumn="creationDateToString">
+          Creation Date
+          <p-sortIcon field="creationDateToString"></p-sortIcon>
+        </th>
+        <th>Action</th>
+        <th>QR Code</th>
+      </tr>
+    </ng-template>
+
+    <!-- Table Rows -->
+    <ng-template pTemplate="body" let-url>
+      <tr>
+        <td>
+          <div class="url-stack">
+            <span>{{ url.shortUrlDetails.shortUrl }}</span
+            ><br />
+            <span>{{ url.shortUrlDetails.fullUrl }}</span>
+          </div>
+        </td>
+        <td>
+          {{ url.creationDateToString }}
+        </td>
+        <td>
+          <!-- Link button that redirects to the full URL in a new tab -->
+          <a [href]="url.shortUrlDetails.fullUrl" target="_blank" rel="noopener noreferrer">
+            <i class="pi pi-copy"></i>
+          </a>
+        </td>
+        <td>
+          <qrcode [qrdata]="url.qrCodeData" [width]="60"></qrcode>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

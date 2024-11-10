@@ -12,6 +12,7 @@ import {
 import { UrlShortenService } from '../services/url-shorten.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { predefinedShortAPIPath } from '../../assets/api/api';
 
 interface UrlState {
   hits: ShortUrl[];
@@ -27,12 +28,42 @@ const initialState: UrlState = {
   isLoadingFind: false,
 };
 
+// Utility function to calculate relative time string
+function getRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+  if (diffInHours < 1) {
+    return 'less than an hour ago';
+  } else if (diffInHours === 1) {
+    return 'about an hour ago';
+  } else if (diffInHours <= 48) {
+    return 'as of now';
+  } else {
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `about ${diffInDays} days ago...`;
+  }
+}
+
 export const UrlStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withComputed(({ hits, totalHits }) => ({
     hitsCount: computed(() => hits().length),
     totalHitsCount: computed(() => totalHits()),
+    // Computed signal for table data
+    urlData: computed(() =>
+      hits().map(hit => ({
+        shortUrlDetails: {
+          shortUrl: `${predefinedShortAPIPath}${hit.shortUrl}`,
+          fullUrl: hit.fullUrl,
+        },
+        creationDateToString: getRelativeTime(new Date(hit.creationDate)),
+        shortUrl: hit.shortUrl,
+        qrCodeData: hit.shortUrl, // Use shortUrl as the data for generating QR code
+      }))
+    ),
   })),
   withHooks({
     onInit(store) {

@@ -4,14 +4,12 @@ main {
   margin: 0 auto;
   overflow: hidden;
   box-sizing: border-box;
-  // @media only screen and (max-width: 1238px) {
-  //   padding: 0 15%;
-  // }
+
   .content-wrapper {
     display: flex;
     flex-direction: column;
     & > *:not(app-url-form) {
-      padding: 0 15%;
+      // padding: 0 15%;
     }
   }
 }
