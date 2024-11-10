@@ -1,17 +1,12 @@
-import { computed, inject } from '@angular/core';
-import { pipe, switchMap, tap } from 'rxjs';
+import { computed, inject, DestroyRef } from '@angular/core';
+import { of, from, EMPTY, pipe } from 'rxjs';
+import { switchMap, tap, expand, takeUntil, finalize } from 'rxjs/operators';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import {
-  ShortUrl,
-  ShortUrlCreationRequest,
-  ShortUrlSearchRequest,
-  ShortUrlSearchResponse,
-} from '../models/short-url.model';
+import { ShortUrl, ShortUrlCreationRequest, ShortUrlSearchResponse } from '../models/short-url.model';
 import { UrlShortenService } from '../services/url-shorten.service';
 import { MessageService } from 'primeng/api';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { predefinedShortAPIPath } from '../../assets/api/api';
 
 interface UrlState {
@@ -28,17 +23,17 @@ const initialState: UrlState = {
   isLoadingFind: false,
 };
 
+// Utility function to calculate relative time string
 function getRelativeTime(date: Date): string {
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
   if (diffInHours < 1) {
     return 'less than an hour ago';
   } else if (diffInHours === 1) {
     return 'about an hour ago';
-  } else if (diffInHours <= 48) {
-    return 'as of now';
+  } else if (diffInHours <= 24) {
+    return `about ${diffInHours} hours ago`;
   } else {
     const diffInDays = Math.floor(diffInHours / 24);
     return `about ${diffInDays} days ago...`;
@@ -66,94 +61,107 @@ export const UrlStore = signalStore(
   withHooks({
     onInit(store) {
       const urlShortenService = inject(UrlShortenService);
+      const destroyRef = inject(DestroyRef);
 
-      const searchRequest: ShortUrlSearchRequest = {
-        pageNumber: 0,
-        pageSize: 100,
-        term: '',
-      };
+      // Create an observable from the onDestroy event of DestroyRef
+      const destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)));
+
+      const pageSize = 100;
 
       patchState(store, {
         isLoadingFind: true,
       });
 
-      urlShortenService
-        .findShortUrls(searchRequest)
+      of({ pageNumber: 0, pageSize })
         .pipe(
-          takeUntilDestroyed(),
-          tapResponse({
-            next: (response: ShortUrlSearchResponse) => {
-              patchState(store, {
-                hits: [...response.hits],
-                totalHits: response.totalHits,
-              });
+          expand(({ pageNumber }) => {
+            // Expand operator helps to recursively call the API for all pages
+            return urlShortenService.findShortUrls({ pageNumber, pageSize, term: '' }).pipe(
+              tapResponse({
+                next: (response: ShortUrlSearchResponse) => {
+                  patchState(store, {
+                    hits: [...store.hits(), ...response.hits],
+                    totalHits: response.totalHits,
+                  });
+                },
+                error: (err: { status: number; message: string }) => {
+                  console.error(`Error fetching short URLs: ${err.message}`);
+                  patchState(store, {
+                    isLoadingFind: false,
+                  });
+                },
+              }),
+              switchMap((response: ShortUrlSearchResponse) => {
+                if ((pageNumber + 1) * pageSize < response.totalHits) {
+                  return of({ pageNumber: pageNumber + 1, pageSize });
+                } else {
+                  return EMPTY; // Stop recursion
+                }
+              })
+            );
+          }),
+          takeUntil(destroy$),
+          finalize(() => {
+            patchState(store, {
+              isLoadingFind: false,
+            });
 
-              console.log('State after fetching short URLs:', {
-                hits: store.hits(),
-                totalHits: store.totalHits(),
-                isLoadingFind: store.isLoadingFind(),
-              });
-            },
-            error: (err: { status: number; message: string }) => {
-              console.error(`Error fetching short URLs: ${err.message}`);
-            },
-            finalize: () => {
-              patchState(store, {
-                isLoadingFind: false,
-              });
-
-              console.log('State after finalizing the fetch request:', {
-                hits: store.hits(),
-                totalHits: store.totalHits(),
-                isLoadingFind: store.isLoadingFind(),
-              });
-            },
+            console.log('State after finalizing the fetch request:', {
+              hits: store.hits(),
+              totalHits: store.totalHits(),
+              isLoadingFind: store.isLoadingFind(),
+            });
           })
         )
         .subscribe();
     },
   }),
-  withMethods((store, urlShortenService = inject(UrlShortenService), messageService = inject(MessageService)) => ({
-    createShortUrl: rxMethod<ShortUrlCreationRequest>(
-      pipe(
-        tap(() =>
-          patchState(store, {
-            isLoadingCreate: true,
-          })
-        ),
-        switchMap(request =>
-          urlShortenService.createShortUrl(request).pipe(
-            takeUntilDestroyed(),
-            tapResponse({
-              next: shortUrl => {
-                patchState(store, {
-                  hits: [...store.hits(), shortUrl],
-                  totalHits: store.totalHits() + 1,
-                });
-                messageService.add({
-                  severity: 'success',
-                  summary: 'Success',
-                  detail: 'Short URL created successfully!',
-                  sticky: true,
-                });
-              },
-              error: (err: { status: number; message: string }) => {
-                console.error(`Error creating short URL: ${err.message}`);
-                messageService.add({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: `Failed to create short URL: ${err.message}`,
-                  sticky: true,
-                });
-              },
-              finalize: () =>
-                patchState(store, {
-                  isLoadingCreate: false,
-                }),
+  withMethods((store, urlShortenService = inject(UrlShortenService), messageService = inject(MessageService)) => {
+    const destroyRef = inject(DestroyRef);
+    const destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)));
+
+    return {
+      createShortUrl: rxMethod<ShortUrlCreationRequest>(
+        pipe(
+          tap(() =>
+            patchState(store, {
+              isLoadingCreate: true,
             })
+          ),
+          switchMap(request =>
+            urlShortenService.createShortUrl(request).pipe(
+              takeUntil(destroy$),
+              tapResponse({
+                next: shortUrl => {
+                  patchState(store, {
+                    hits: [...store.hits(), shortUrl],
+                    totalHits: store.totalHits() + 1,
+                  });
+                  messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Short URL created successfully!',
+                    sticky: true,
+                  });
+                },
+                error: (err: { status: number; message: string }) => {
+                  console.error(`Error creating short URL: ${err.message}`);
+                  messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: `Failed to create short URL: ${err.message}`,
+                    sticky: true,
+                  });
+                },
+                finalize: () =>
+                  patchState(store, {
+                    isLoadingCreate: false,
+                  }),
+              })
+            )
           )
         )
-      )
-    ),
-  }))
+      ),
+    };
+  })
 );
