@@ -1,29 +1,32 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
 import { TableModule } from 'primeng/table';
-import { DropdownModule } from 'primeng/dropdown';
-import { ButtonModule } from 'primeng/button';
-import { PaginatorModule } from 'primeng/paginator';
-import { QRCodeModule } from 'angularx-qrcode'; // Import QR code module
 import { UrlStore } from '../../state/url.store';
 import { CommonModule } from '@angular/common';
+import { PaginatorState } from 'primeng/paginator';
+import { OnInit } from '@angular/core';
+import { QRCodeModule } from 'angularx-qrcode';
+import { Button } from 'primeng/button';
 
 @Component({
   selector: 'app-url-table',
   standalone: true,
-  imports: [FormsModule, TableModule, DropdownModule, ButtonModule, PaginatorModule, QRCodeModule, CommonModule],
+  imports: [TableModule, CommonModule, QRCodeModule, Button],
   templateUrl: './url-table.component.html',
   styleUrls: ['./url-table.component.scss'],
 })
-export class UrlTableComponent {
+export class UrlTableComponent implements OnInit {
   readonly store = inject(UrlStore);
 
-  // Rows per page options
-  rowsPerPageOptions = [10, 25, 50, 100];
-  rowsPerPage = signal(this.rowsPerPageOptions[0]);
+  first = 0;
+  rows = 10;
+  totalRecords = 99;
 
-  // Method to update rows per page
-  updateRowsPerPage(event: number) {
-    this.rowsPerPage.set(event);
+  pageChange(event: PaginatorState) {
+    this.first = event.first!;
+    this.rows = event.rows!;
+  }
+
+  ngOnInit() {
+    console.log('Total records initially:', this.totalRecords);
   }
 }
