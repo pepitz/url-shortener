@@ -1,5 +1,5 @@
 import { computed, inject, DestroyRef } from '@angular/core';
-import { of, from, EMPTY, pipe } from 'rxjs';
+import { of, from, pipe, EMPTY } from 'rxjs';
 import { switchMap, tap, expand, takeUntil, finalize } from 'rxjs/operators';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -31,15 +31,19 @@ export const UrlStore = signalStore(
     hitsCount: computed(() => hits().length),
     totalHitsCount: computed(() => totalHits()),
     urlData: computed(() =>
-      hits().map(hit => ({
-        shortUrlDetails: {
-          shortUrl: `${predefinedShortAPIPath}${hit.shortUrl}`,
-          fullUrl: hit.fullUrl,
-        },
-        creationDateToString: getRelativeTime(new Date(hit.creationDate)),
-        shortUrl: hit.shortUrl,
-        qrCodeData: hit.shortUrl,
-      }))
+      hits().map(hit => {
+        const fullUrl = hit.fullUrl.startsWith('http') ? hit.fullUrl : `https://${hit.fullUrl}`;
+
+        return {
+          shortUrlDetails: {
+            shortUrl: `${predefinedShortAPIPath}${hit.shortUrl}`,
+            fullUrl: fullUrl,
+          },
+          creationDateToString: getRelativeTime(new Date(hit.creationDate)),
+          shortUrl: hit.shortUrl,
+          qrCodeData: encodeURI(fullUrl),
+        };
+      })
     ),
   })),
   withHooks({
@@ -47,7 +51,6 @@ export const UrlStore = signalStore(
       const urlShortenService = inject(UrlShortenService);
       const destroyRef = inject(DestroyRef);
 
-      // Create an observable from the onDestroy event of DestroyRef
       const destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)));
 
       const pageSize = 100;
@@ -59,7 +62,6 @@ export const UrlStore = signalStore(
       of({ pageNumber: 0, pageSize })
         .pipe(
           expand(({ pageNumber }) => {
-            // Expand operator helps to recursively call the API for all pages
             return urlShortenService.findShortUrls({ pageNumber, pageSize, term: '' }).pipe(
               tapResponse({
                 next: (response: ShortUrlSearchResponse) => {
@@ -117,10 +119,14 @@ export const UrlStore = signalStore(
               takeUntil(destroy$),
               tapResponse({
                 next: shortUrl => {
+                  const updatedHits = [...store.hits(), shortUrl];
+                  updatedHits.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
+
                   patchState(store, {
-                    hits: [...store.hits(), shortUrl],
-                    totalHits: store.totalHits() + 1,
+                    hits: updatedHits,
+                    totalHits: updatedHits.length,
                   });
+
                   messageService.add({
                     severity: 'success',
                     summary: 'Success',
