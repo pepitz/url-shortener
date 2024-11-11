@@ -1,0 +1,9 @@
+[build]
+  command = "ng build --configuration=production"
+  publish = "dist/url-shortener"
+  node_version = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
