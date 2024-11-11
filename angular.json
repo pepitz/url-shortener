@@ -17,7 +17,6 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "baseHref": "url-shortener",
             "outputPath": "dist/url-shortener",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -51,12 +50,14 @@
                   "maximumError": "1mb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/url-shortener/"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": false
+              "sourceMap": false,
+              "baseHref": "/"
             }
           },
           "defaultConfiguration": "production"
