@@ -1,15 +1,10 @@
 main {
-  max-width: var(--width-content);
   background-color: var(--color-white);
-  margin: 0 auto;
   overflow: hidden;
   box-sizing: border-box;
 
   .content-wrapper {
     display: flex;
     flex-direction: column;
-    & > *:not(app-url-form) {
-      // padding: 0 15%;
-    }
   }
 }
