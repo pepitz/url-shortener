@@ -46,74 +46,35 @@ export const UrlStore = signalStore(
       })
     ),
   })),
-  withHooks({
-    onInit(store) {
-      const urlShortenService = inject(UrlShortenService);
-      const destroyRef = inject(DestroyRef);
-
-      const destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)));
-
-      const pageSize = 100;
-
+  withMethods(store => ({
+    _setUrlHits(updatedHits: ShortUrl[], updatedTotalHits: number) {
       patchState(store, {
-        isLoadingFind: true,
+        hits: [...updatedHits],
+        totalHits: updatedTotalHits,
       });
-
-      of({ pageNumber: 0, pageSize })
-        .pipe(
-          expand(({ pageNumber }) => {
-            return urlShortenService.findShortUrls({ pageNumber, pageSize, term: '' }).pipe(
-              tapResponse({
-                next: (response: ShortUrlSearchResponse) => {
-                  patchState(store, {
-                    hits: [...store.hits(), ...response.hits],
-                    totalHits: response.totalHits,
-                  });
-                },
-                error: (err: { status: number; message: string }) => {
-                  console.error(`Error fetching short URLs: ${err.message}`);
-                  patchState(store, {
-                    isLoadingFind: false,
-                  });
-                },
-              }),
-              switchMap((response: ShortUrlSearchResponse) => {
-                if ((pageNumber + 1) * pageSize < response.totalHits) {
-                  return of({ pageNumber: pageNumber + 1, pageSize });
-                } else {
-                  return EMPTY;
-                }
-              })
-            );
-          }),
-          takeUntil(destroy$),
-          finalize(() => {
-            patchState(store, {
-              isLoadingFind: false,
-            });
-
-            console.log('State after finalizing the fetch request:', {
-              hits: store.hits(),
-              totalHits: store.totalHits(),
-              isLoadingFind: store.isLoadingFind(),
-            });
-          })
-        )
-        .subscribe();
     },
-  }),
-  withMethods((store, urlShortenService = inject(UrlShortenService), messageService = inject(MessageService)) => {
-    const destroyRef = inject(DestroyRef);
-    const destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)));
-
-    return {
+    _setLoadingCreate(status: boolean) {
+      patchState(store, {
+        isLoadingCreate: status,
+      });
+    },
+    _setLoadingFind(status: boolean) {
+      patchState(store, {
+        isLoadingFind: status,
+      });
+    },
+  })),
+  withMethods(
+    (
+      store,
+      urlShortenService = inject(UrlShortenService),
+      messageService = inject(MessageService),
+      destroyRef = inject(DestroyRef),
+      destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)))
+    ) => ({
       createShortUrl: rxMethod<ShortUrlCreationRequest>(
         pipe(
-          tap(() =>
-            patchState(store, {
-              isLoadingCreate: true,
-            })
-          ),
+          tap(() => store._setLoadingCreate(true)),
           switchMap(request =>
             urlShortenService.createShortUrl(request).pipe(
               takeUntil(destroy$),
@@ -122,10 +83,7 @@ export const UrlStore = signalStore(
                   const updatedHits = [...store.hits(), shortUrl];
                   updatedHits.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
 
-                  patchState(store, {
-                    hits: updatedHits,
-                    totalHits: updatedHits.length,
-                  });
+                  store._setUrlHits(updatedHits, updatedHits.length);
 
                   messageService.add({
                     severity: 'success',
@@ -143,15 +101,54 @@ export const UrlStore = signalStore(
                     sticky: true,
                   });
                 },
-                finalize: () =>
-                  patchState(store, {
-                    isLoadingCreate: false,
-                  }),
+                finalize: () => store._setLoadingCreate(false),
               })
             )
           )
         )
       ),
-    };
+      fetchAllRecords: rxMethod<{ pageNumber: number; pageSize: number }>(
+        pipe(
+          tap(() => store._setLoadingFind(true)),
+          expand(({ pageNumber, pageSize }) => {
+            // Fetch a page of URLs from the service
+            return urlShortenService.findShortUrls({ pageNumber, pageSize, term: '' }).pipe(
+              tapResponse({
+                next: (response: ShortUrlSearchResponse) => {
+                  const updatedHitsWithResponse = [...store.hits(), ...response.hits];
+                  store._setUrlHits(updatedHitsWithResponse, response.totalHits);
+                },
+                error: (err: { status: number; message: string }) => {
+                  console.error(`Error fetching short URLs: ${err.message}`);
+                  store._setLoadingFind(false);
+                },
+              }),
+              // Continue if there are more pages to load
+              switchMap((response: ShortUrlSearchResponse) => {
+                if ((pageNumber + 1) * pageSize < response.totalHits) {
+                  return of({ pageNumber: pageNumber + 1, pageSize });
+                } else {
+                  return EMPTY;
+                }
+              })
+            );
+          }),
+          takeUntil(destroy$),
+          finalize(() => {
+            store._setLoadingFind(false);
+            console.log('State after finalizing the fetch request:', {
+              hits: store.hits(),
+              totalHits: store.totalHits(),
+              isLoadingFind: store.isLoadingFind(),
+            });
+          })
+        )
+      ),
+    })
+  ),
+  withHooks({
+    onInit(store) {
+      store.fetchAllRecords({ pageNumber: 0, pageSize: 100 });
+    },
   })
 );
