@@ -68,45 +68,9 @@ export const UrlStore = signalStore(
     (
       store,
       urlShortenService = inject(UrlShortenService),
-      messageService = inject(MessageService),
       destroyRef = inject(DestroyRef),
       destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)))
     ) => ({
-      createShortUrl: rxMethod<ShortUrlCreationRequest>(
-        pipe(
-          tap(() => store._setLoadingCreate(true)),
-          switchMap(request =>
-            urlShortenService.createShortUrl(request).pipe(
-              takeUntil(destroy$),
-              tapResponse({
-                next: shortUrl => {
-                  const updatedHits = [...store.hits(), shortUrl];
-                  updatedHits.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
-
-                  store._setUrlHits(updatedHits, updatedHits.length);
-
-                  messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Short URL created successfully!',
-                    sticky: true,
-                  });
-                },
-                error: (err: { status: number; message: string }) => {
-                  console.error(`Error creating short URL: ${err.message}`);
-                  messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: `Failed to create short URL: ${err.message}`,
-                    sticky: true,
-                  });
-                },
-                finalize: () => store._setLoadingCreate(false),
-              })
-            )
-          )
-        )
-      ),
       fetchAllRecords: rxMethod<{ pageNumber: number; pageSize: number }>(
         pipe(
           tap(() => store._setLoadingFind(true)),
@@ -142,6 +106,60 @@ export const UrlStore = signalStore(
               isLoadingFind: store.isLoadingFind(),
             });
           })
+        )
+      ),
+    })
+  ),
+  withMethods(
+    (
+      store,
+      urlShortenService = inject(UrlShortenService),
+      messageService = inject(MessageService),
+      destroyRef = inject(DestroyRef),
+      destroy$ = from(new Promise<void>(resolve => destroyRef.onDestroy(resolve)))
+    ) => ({
+      createShortUrl: rxMethod<ShortUrlCreationRequest>(
+        pipe(
+          tap(() => store._setLoadingCreate(true)),
+          switchMap(request =>
+            urlShortenService.createShortUrl(request).pipe(
+              takeUntil(destroy$),
+              tapResponse({
+                next: shortUrl => {
+                  // Optimistically add the short URL
+                  const updatedHits = [...store.hits(), shortUrl];
+                  updatedHits.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
+                  store._setUrlHits(updatedHits, updatedHits.length);
+
+                  // After successfully creating the short URL, fetch all records to ensure consistency
+                  store.fetchAllRecords({ pageNumber: 0, pageSize: 100 });
+
+                  // Show the success message once all operations are complete
+                  messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Short URL created successfully!',
+                    sticky: true,
+                  });
+                },
+                error: (err: { status: number; message: string }) => {
+                  console.error(`Error creating short URL: ${err.message}`);
+
+                  // Rollback the optimistic update
+                  const previousHits = store.hits().filter(hit => hit.shortUrl !== request.shortUrl);
+                  store._setUrlHits(previousHits, previousHits.length);
+
+                  messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: `Failed to create short URL: ${err.message}`,
+                    sticky: true,
+                  });
+                },
+                finalize: () => store._setLoadingCreate(false),
+              })
+            )
+          )
         )
       ),
     })
