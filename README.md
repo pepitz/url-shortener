@@ -11,7 +11,7 @@ This is a modern, responsive URL Shortener application built with Angular, desig
 - **PrimeNG**: A UI component library providing a wide array of pre-designed components like tables, buttons, dropdowns, and paginator features that are used throughout the project.
 - **PrimeFlex and PrimeIcons**: PrimeFlex is used for CSS utility classes to enhance the responsiveness and layout flexibility, and PrimeIcons provides a rich set of icons for the interface.
 - **AngularX QR Code**: This library allows us to generate QR codes from URLs dynamically, providing a quick way for users to scan and access shortened links directly.
-- **CORS-Anywhere**: A solution to handle CORS issues when the application is connecting to third-party APIs. This solution runs at the same level as the Angular application to ensure cross-origin requests are handled effectively.
+- **CORS-Anywhere**: A solution to handle CORS issues when the application is connecting to third-party APIs. This solution runs alongside the Angular application to ensure cross-origin requests are handled effectively.
 
 ### Project Setup and Dependencies
 
@@ -19,22 +19,27 @@ The project includes several dependencies that need to be installed before you c
 
 Please make sure you have the following prerequisites installed:
 
-- **Node.js (>= 14.x.x)**
-- **npm (>= 6.x.x)**
+- **Node.js (>= 22.1.0)**
+- **npm (>= 10.9.0)**
 
-After unzipping the project folder, follow these steps to install the necessary dependencies and start the application.
+After cloning the project from GitHub, follow these steps to install the necessary dependencies and start the application.
 
 ## Installation and Setup
 
-1. **Unzip the Sartorius Folder**
+1. **Clone the Repository**
 
-   - After unzipping the `Sartorius` folder, navigate to the project directory in your terminal.
+   - Clone the repository from GitHub:
+
+     ```bash
+     git clone https://github.com/pepitz/url-shortener.git
+     ```
 
 2. **Install Dependencies**
 
-   - The `node_modules` folder is not included to keep the project light. Therefore, you'll need to install the dependencies by running:
+   - Navigate to the `url-shortener` folder and install the dependencies:
 
      ```bash
+     cd url-shortener
      npm install
      ```
 
@@ -43,16 +48,23 @@ After unzipping the project folder, follow these steps to install the necessary 
 3. **Run Proxy and Angular Server**
 
    - **Important**: To properly run the application, due to the backend API not being configured for CORS, you must execute a combined script to start both the proxy server and the Angular development server.
-   - Open a terminal in the project directory (`url-shortener`), and run the script `./run-proxy-and-angular.sh`:
+
+   - Run the script `run-proxy-and-angular.sh` to start both services:
 
      ```bash
      ./run-proxy-and-angular.sh
      ```
 
-   - The script will automatically navigate to the CORS-anywhere folder, start the proxy, and then start the Angular server. Ensure you run it in any web code editor like VS Code, and execute it directly from the Terminal console.
+   - The script will automatically navigate to the CORS-anywhere folder, start the proxy, and then start the Angular server.
+
+   - Note: You may need to set permissions to execute the script by running:
+
+     ```bash
+     chmod +x run-proxy-and-angular.sh
+     ```
 
 4. **Access the Application**
-   - Once the server is up and running, open your browser and go to [http://localhost:4200/url-shortener](http://localhost:4200/url-shortener) to access the application.
+   - Once the server is up and running, open your browser and go to [http://localhost:4200](http://localhost:4200) to access the application.
 
 ## Features Overview
 
@@ -66,24 +78,21 @@ After unzipping the project folder, follow these steps to install the necessary 
 Here's a detailed look at the folder structure to help you understand how the project is organized:
 
 ```
-Sartorius/
+url-shortener/
 |
 ├── cors-anywhere/                  # CORS proxy server to handle CORS issues
 │   ├── server.js                   # Main server file for CORS proxy
 │   ├── package.json                # Dependencies for the CORS proxy
 │   └── ...                         # Other files related to CORS setup
 |
-├── url-shortener/                  # Angular URL Shortener application
-│   ├── src/                        # Main source code for the Angular application
-│   │   ├── app/                    # Angular application components, services, etc.
-│   │   ├── assets/                 # Static assets like images and configuration files
-│   │   ├── styles.scss             # Global stylesheet for the application
-│   │   └── index.html              # Main HTML file
-│   ├── angular.json                # Angular CLI configuration file
-│   ├── package.json                # Dependencies for the Angular application
-│   ├── run-proxy-and-angular.sh    # Shell script to start both the proxy server and the Angular app
-│   └── ...                         # Other Angular-specific configuration files
-|
+├── src/                            # Main source code for the Angular application
+│   ├── app/                        # Angular application components, services, etc.
+│   ├── assets/                     # Static assets like images and configuration files
+│   ├── styles.scss                 # Global stylesheet for the application
+│   └── index.html                  # Main HTML file
+├── angular.json                    # Angular CLI configuration file
+├── package.json                    # Dependencies for the Angular application
+├── run-proxy-and-angular.sh        # Shell script to start both the proxy server and the Angular app
 └── README.md                       # Documentation file
 ```
 
@@ -101,5 +110,3 @@ Sartorius/
   ```
 
 - If you encounter issues related to CORS, verify that the CORS-anywhere server is active and running.
-
-- If the browser fails to load the page correctly, make sure to navigate to the correct URL with the base href path `/url-shortener/`, e.g., [http://localhost:4200/url-shortener](http://localhost:4200/url-shortener).
