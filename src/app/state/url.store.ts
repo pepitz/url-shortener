@@ -2,7 +2,7 @@ import { computed, inject, DestroyRef } from '@angular/core';
 import { withDevtools } from '@angular-architects/ngrx-toolkit';
 import { of, from, pipe, EMPTY } from 'rxjs';
 import { switchMap, tap, expand, takeUntil, finalize } from 'rxjs/operators';
-import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withMethods, withState, withHooks } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { ShortUrl, ShortUrlCreationRequest, ShortUrlSearchResponse } from '../models/short-url.model';
@@ -166,10 +166,5 @@ export const UrlStore = signalStore(
         )
       ),
     })
-  ),
-  withHooks({
-    onInit(store) {
-      store.fetchAllRecords({ pageNumber: 0, pageSize: 100 });
-    },
-  })
+  )
 );
