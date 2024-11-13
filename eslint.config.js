@@ -1,11 +1,3 @@
-// @ts-check
-const eslint = require('@eslint/js');
-const tseslint = require('typescript-eslint');
-const angular = require('angular-eslint');
-const eslintConfigPrettier = require('eslint-config-prettier');
-const prettierPlugin = require('eslint-plugin-prettier');
-const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
-
 module.exports = tseslint.config(
   {
     files: ['**/*.ts'],
@@ -33,6 +25,10 @@ module.exports = tseslint.config(
           prefix: 'app',
           style: 'kebab-case',
         },
+      ],
+      'no-unused-vars': [
+        'warn',
+        { vars: 'all', args: 'none', ignoreRestSiblings: false },
       ],
     },
   },
