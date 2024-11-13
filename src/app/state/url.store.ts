@@ -1,4 +1,5 @@
 import { computed, inject, DestroyRef } from '@angular/core';
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
 import { of, from, pipe, EMPTY } from 'rxjs';
 import { switchMap, tap, expand, takeUntil, finalize } from 'rxjs/operators';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
@@ -8,7 +9,7 @@ import { ShortUrl, ShortUrlCreationRequest, ShortUrlSearchResponse } from '../mo
 import { UrlShortenService } from '../services/url-shorten.service';
 import { MessageService } from 'primeng/api';
 import { predefinedShortAPIPath } from '../../assets/api/api';
-import { getRelativeTime } from '../utils';
+import { getRelativeTime, getUserFriendlyErrorMessage } from '../utils';
 
 interface UrlState {
   hits: ShortUrl[];
@@ -26,6 +27,7 @@ const initialState: UrlState = {
 
 export const UrlStore = signalStore(
   { providedIn: 'root' },
+  withDevtools('urlStore'),
   withState(initialState),
   withComputed(({ hits, totalHits }) => ({
     hitsCount: computed(() => hits().length),
@@ -75,7 +77,6 @@ export const UrlStore = signalStore(
         pipe(
           tap(() => store._setLoadingFind(true)),
           expand(({ pageNumber, pageSize }) => {
-            // Fetch a page of URLs from the service
             return urlShortenService.findShortUrls({ pageNumber, pageSize, term: '' }).pipe(
               tapResponse({
                 next: (response: ShortUrlSearchResponse) => {
@@ -145,14 +146,16 @@ export const UrlStore = signalStore(
                 error: (err: { status: number; message: string }) => {
                   console.error(`Error creating short URL: ${err.message}`);
 
-                  // Rollback the optimistic update
+                  // Rollback the optimistic update (if applicable)
                   const previousHits = store.hits().filter(hit => hit.shortUrl !== request.shortUrl);
                   store._setUrlHits(previousHits, previousHits.length);
 
+                  // Get a user-friendly error message and display it using the MessageService
+                  const userFriendlyMessage = getUserFriendlyErrorMessage(err);
                   messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: `Failed to create short URL: ${err.message}`,
+                    detail: userFriendlyMessage,
                     sticky: true,
                   });
                 },
