@@ -27,6 +27,12 @@
   color: var(--color-secondary);
   font-family: var(--font-sartorious);
 
+  .p-sortable-column-icon {
+    height: 1.6rem;
+    width: 1.6rem;
+    color: var(--color-secondary);
+  }
+
   .p-datatable-header {
     background-color: transparent;
     border: none;
