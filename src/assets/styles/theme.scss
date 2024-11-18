@@ -24,8 +24,8 @@
 }
 
 ::ng-deep p-table {
-  color: var(--color-secondary) !important;
-  font-family: var(--font-sartorious) !important;
+  color: var(--color-secondary);
+  font-family: var(--font-sartorious);
 
   .p-datatable-header {
     background-color: transparent;
@@ -39,6 +39,7 @@
     padding-left: 0.8rem;
     border-radius: 0;
     border-color: var(--color-border-grey);
+
     &:focus {
       border-color: var(--color-secondary);
       box-shadow: none;
@@ -46,69 +47,58 @@
   }
 
   table {
-    font-family: var(--font-sartorious) !important;
+    font-family: var(--font-sartorious);
     font-size: 1.4rem;
-    color: var(--color-secondary) !important;
+    color: var(--color-secondary);
 
     th,
     td {
-      font-family: var(--font-sartorious) !important;
-      color: var(--color-secondary) !important;
-      background-color: transparent !important;
+      font-family: var(--font-sartorious);
+      color: var(--color-secondary);
+      background-color: transparent;
 
       a i {
-        font-size: 3rem !important;
+        font-size: 3rem;
         color: var(--color-secondary);
       }
     }
 
     thead {
       font-size: 1.4rem;
+
       th {
         font-weight: 700;
-        background-color: transparent !important;
+        background-color: transparent;
       }
     }
 
     tbody {
       tr {
-        background-color: transparent !important;
+        background-color: transparent;
 
         &:hover {
-          background-color: transparent !important;
+          background-color: transparent;
         }
-      }
-
-      td {
       }
     }
 
     tfoot {
       tr {
-        background-color: transparent !important;
+        background-color: transparent;
       }
+
       td {
-        color: var(--color-secondary) !important;
+        color: var(--color-secondary);
       }
     }
   }
 
-  table,
-  th,
-  td,
-  .p-datatable-tbody > tr > td,
-  .p-datatable-thead > tr > th {
-    font-family: var(--font-sartorious) !important;
+  .p-datatable-tbody > tr:first-child > td {
+    border-top: 2px solid var(--color-grey);
   }
 
-  .p-datatable .p-datatable-tbody {
-    & > tr:first-child > td {
-      border-top: 2px solid var(--color-grey);
-    }
-
-    & > tr:last-child > td {
-      border-bottom: 2px solid var(--color-grey);
-    }
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: 2px solid var(--color-grey);
   }
 
   .p-inputtext {
@@ -118,14 +108,14 @@
   .p-paginator {
     margin: 1rem 0;
     font-size: 1.4rem;
-    font-family: var(--font-sartorious) !important;
-    background-color: transparent !important;
-    color: var(--color-secondary) !important;
+    font-family: var(--font-sartorious);
+    background-color: transparent;
+    color: var(--color-secondary);
 
     .p-paginator-pages .p-paginator-page,
     .p-paginator-next,
     .p-paginator-prev {
-      color: var(--color-secondary) !important;
+      color: var(--color-secondary);
     }
 
     .p-paginator-current {
@@ -152,6 +142,7 @@
     .p-dropdown {
       border-radius: 0;
       border-color: var(--color-secondary);
+
       &:hover {
         border-color: var(--color-secondary);
       }
@@ -170,13 +161,5 @@
     &.p-highlight {
       background-color: var(--color-primary);
     }
-  }
-
-  ::ng-deep .p-datatable .p-datatable-tbody > tr:first-child > td {
-    border-top: 2px solid var(--color-grey);
-  }
-
-  ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
-    border-bottom: 2px solid var(--color-grey);
   }
 }
