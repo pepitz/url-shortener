@@ -8,7 +8,7 @@
     [rowsPerPageOptions]="rowsPerPageOptions"
     [showCurrentPageReport]="true"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} URLs"
-    [tableStyle]="{ width: '100%' }"
+    [tableStyle]="{ width: '100%', tableLayout: 'fixed' }"
     paginatorPosition="bottom"
     sortField="creationDateToString"
     [sortOrder]="-1"
@@ -25,22 +25,18 @@
         </p-iconField>
       </div>
     </ng-template>
-
     <ng-template pTemplate="header">
       <tr>
         <th class="shorten_head">
-          <span class="shorten_title">Shortened URL</span>
-          <span class="shorten_original">Original URL</span>
+          <span class="shorten_title">Shortened URL</span> <span class="shorten_original">Original URL</span>
         </th>
         <th pSortableColumn="creationDateToString" class="creation-date-column">
-          Creation Date
-          <p-sortIcon field="creationDateToString"></p-sortIcon>
+          Creation Date <p-sortIcon field="creationDateToString"></p-sortIcon>
         </th>
         <th>Action</th>
         <th>QR Code</th>
       </tr>
     </ng-template>
-
     <ng-template pTemplate="body" let-url>
       <tr>
         <td>
@@ -50,9 +46,7 @@
             <span>{{ url.shortUrlDetails.fullUrl }}</span>
           </div>
         </td>
-        <td>
-          {{ url.creationDateToString }}
-        </td>
+        <td>{{ url.creationDateToString }}</td>
         <td>
           <button
             (click)="copyAndOpenUrl(url.shortUrlDetails.shortUrl, url.shortUrlDetails.fullUrl)"
@@ -60,9 +54,7 @@
             <i class="pi pi-copy"></i>
           </button>
         </td>
-        <td>
-          <qrcode [qrdata]="url.qrCodeData" [width]="60"></qrcode>
-        </td>
+        <td><qrcode [qrdata]="url.qrCodeData" [width]="60"></qrcode></td>
       </tr>
     </ng-template>
   </p-table>

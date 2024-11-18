@@ -4,8 +4,14 @@
   flex-direction: column;
   padding: 6rem 10%;
 
+  table {
+    width: 100%;
+    table-layout: fixed;
+    overflow: hidden;
+  }
+
   .url-stack {
-    color: var(--color-grey);
+    color: var(--color-secondary);
   }
 
   .shorten_head {
@@ -26,27 +32,38 @@
     }
   }
 
-  .creation-date-column {
-    width: 25%;
+  th {
+    &:first-child {
+      width: 60%;
+    }
+    &:nth-child(2) {
+      width: 20%;
+    }
+    &:nth-child(3) {
+      width: 10%;
+    }
+    &:last-child {
+      width: 10%;
+    }
   }
-}
 
-::ng-deep .url-stack span {
-  display: inline-block;
-  width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: wrap;
-}
+  ::ng-deep .url-stack span {
+    display: inline-block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.copy-button {
-  border: none;
-  padding: 0.3rem;
-  background: transparent;
-  & > i {
-    font-size: 4rem;
-    &:hover {
-      cursor: pointer;
+  .copy-button {
+    border: none;
+    padding: 0.3rem;
+    background: transparent;
+    & > i {
+      font-size: 4rem;
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 }
