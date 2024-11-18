@@ -106,6 +106,10 @@
     }
   }
 
+  .p-inputtext {
+    color: var(--color-secondary);
+  }
+
   .p-paginator {
     font-size: 1.4rem;
     font-family: var(--font-sartorious) !important;
@@ -115,7 +119,11 @@
     .p-paginator-pages .p-paginator-page,
     .p-paginator-next,
     .p-paginator-prev {
-      color: var(--color-grey) !important;
+      color: var(--color-secondary) !important;
+    }
+
+    .p-paginator-current {
+      color: var(--color-secondary);
     }
 
     .p-paginator-page {
@@ -137,17 +145,32 @@
 
     .p-dropdown {
       border-radius: 0;
+      border-color: var(--color-secondary);
       &:hover {
         border-color: var(--color-secondary);
       }
+
+      & .p-dropdown-trigger {
+        color: var(--color-secondary);
+      }
     }
   }
-}
 
-::ng-deep .p-datatable .p-datatable-tbody > tr:first-child > td {
-  border-top: 2px solid var(--color-grey);
-}
+  .p-dropdown-item {
+    font-size: 1.4rem;
+    font-family: var(--font-sartorious);
+    color: var(--color-secondary);
 
-::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
-  border-bottom: 2px solid var(--color-grey);
+    &.p-highlight {
+      background-color: var(--color-primary);
+    }
+  }
+
+  ::ng-deep .p-datatable .p-datatable-tbody > tr:first-child > td {
+    border-top: 2px solid var(--color-grey);
+  }
+
+  ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td {
+    border-bottom: 2px solid var(--color-grey);
+  }
 }
