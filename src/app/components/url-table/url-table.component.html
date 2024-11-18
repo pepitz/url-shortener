@@ -54,9 +54,11 @@
           {{ url.creationDateToString }}
         </td>
         <td>
-          <a [href]="url.shortUrlDetails.fullUrl" target="_blank" rel="noopener noreferrer">
+          <button
+            (click)="copyAndOpenUrl(url.shortUrlDetails.shortUrl, url.shortUrlDetails.fullUrl)"
+            class="copy-button">
             <i class="pi pi-copy"></i>
-          </a>
+          </button>
         </td>
         <td>
           <qrcode [qrdata]="url.qrCodeData" [width]="60"></qrcode>

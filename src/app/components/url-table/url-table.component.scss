@@ -38,3 +38,15 @@
   text-overflow: ellipsis;
   white-space: wrap;
 }
+
+.copy-button {
+  border: none;
+  padding: 0.3rem;
+  background: transparent;
+  & > i {
+    font-size: 4rem;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
