@@ -27,6 +27,11 @@
   color: var(--color-secondary) !important;
   font-family: var(--font-sartorious) !important;
 
+  .p-datatable-header {
+    background-color: transparent;
+    border: none;
+  }
+
   .p-inputtext {
     font-family: var(--font-sartorious);
     font-size: 1.4rem;
@@ -111,6 +116,7 @@
   }
 
   .p-paginator {
+    margin: 1rem 0;
     font-size: 1.4rem;
     font-family: var(--font-sartorious) !important;
     background-color: transparent !important;
