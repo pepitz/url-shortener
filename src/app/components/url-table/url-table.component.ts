@@ -1,11 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
-import { QRCodeModule } from 'angularx-qrcode';
 import { TableModule } from 'primeng/table';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { UrlStore } from '../../state/url.store';
 import { MessageService } from 'primeng/api';
+
+import { UrlStore } from '../../state/url.store';
+
+import { QRCodeModule } from 'angularx-qrcode';
+import { predefinedShortAPIPath } from '../../../assets/api/api';
 
 @Component({
   selector: 'app-url-table',
@@ -27,10 +30,16 @@ export class UrlTableComponent {
       .then(() => {
         console.log('Short URL copied to clipboard:', shortUrl);
 
+        const optionalPart = fullUrl.split('/').pop();
+        const displayUrl = `${predefinedShortAPIPath}${optionalPart}`;
+
         const newTab = window.open(fullUrl, '_blank');
 
         if (newTab) {
           newTab.focus();
+          newTab.onload = () => {
+            newTab.history.replaceState(null, '', displayUrl);
+          };
         } else {
           this.messageService.add({
             severity: 'error',
@@ -39,8 +48,7 @@ export class UrlTableComponent {
           });
         }
       })
-      .catch(err => {
-        console.error('Could not copy text: ', err);
+      .catch(_ => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
